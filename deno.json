@@ -1,8 +1,5 @@
 {
   "fmt": {
-    "files": {
-      "include": ["src/"]
-    },
     "options": {
       "useTabs": false,
       "indentWidth": 2,
@@ -12,6 +9,6 @@
     }
   },
   "tasks": {
-    "start": "deno run --allow-read --allow-env --watch index.ts"
+    "start": "deno run --allow-read --allow-env --allow-net main.ts"
   }
 }
