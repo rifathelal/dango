@@ -1,5 +1,11 @@
 import './deps.ts'
-import { createBot, Intents, startBot, getChannel, getMessage, Message, deleteMessage, sendMessage } from 'https://deno.land/x/discordeno@18.0.1/mod.ts'
+import {
+  createBot,
+  deleteMessage,
+  Intents,
+  Message,
+  startBot,
+} from 'https://deno.land/x/discordeno@18.0.1/mod.ts'
 
 const DEBUG = Deno.env.get('DEBUG') === 'true'
 const BOT_TOKEN = Deno.env.get('BOT_TOKEN')
@@ -18,8 +24,7 @@ async function main() {
 
   const bot = createBot({
     token: BOT_TOKEN,
-    intents: 
-      Intents.Guilds | Intents.GuildMessages | 
+    intents: Intents.Guilds | Intents.GuildMessages |
       Intents.DirectMessages | Intents.MessageContent,
     events: {
       ready(_bot, payload) {
@@ -35,7 +40,7 @@ async function main() {
             }
           }
         }
-        
+
         if (message.embeds.length == 0) {
           setTimeout(async () => {
             console.log('late print')
@@ -45,9 +50,9 @@ async function main() {
           console.log('early print')
           await checkMessage(message)
         }
-      }
+      },
     },
-  });
+  })
 
   await startBot(bot)
 }
