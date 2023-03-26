@@ -67,7 +67,7 @@ const fetchPost: Command = {
     }
 
     const post = await fetch(
-      `https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=1&tags=${tag}%20sort:random`,
+      `https://ja.gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=1&tags=${tag}%20sort:random`,
     )
     const postjson = await post.json()
 
