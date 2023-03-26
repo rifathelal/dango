@@ -18,7 +18,11 @@ const messageCreate: EventHandlers['messageCreate'] = async (bot, message) => {
     command.name == ucommand || (command.aliases?.includes(ucommand) ?? false)
   )
 
-  if (command) await command.execute(bot, message, args)
+  try {
+    if (command) await command.execute(bot, message, args)
+  } catch (error: unknown) {
+    console.error(`Something went wrong: ${error}`)
+  }
 }
 
 export const events: Partial<EventHandlers> = { ready, messageCreate }
