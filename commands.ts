@@ -70,9 +70,8 @@ const fetchPost: Command = {
       `https://ja.gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=1&tags=${tag}%20sort:random`,
     )
     const postjson = await post.json()
-
     await sendMessage(bot, message.channelId, {
-      content: `${postjson?.post[0].file_url}`,
+      content: `${postjson?.post?.[0]?.file_url ?? 'Not found'}`,
     })
   },
 }
