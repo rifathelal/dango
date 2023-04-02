@@ -3,8 +3,11 @@ import {
   Message,
   sendMessage,
 } from 'https://deno.land/x/discordeno@18.0.1/mod.ts'
-
-const data: { tag: string; server: string; sublist: (number | bigint)[] }[] = []
+import {
+  getSubscriptions,
+  subIfNotSubbed,
+  unsubscribe as unsubscribeDB,
+} from './db.ts'
 
 export type Command = {
   name: string
@@ -21,34 +24,39 @@ const ping: Command = {
   },
 }
 
-const register: Command = {
-  name: 'register',
-  description: 'Registers a tag',
+const subscribe: Command = {
+  name: 'subscribe',
+  description: 'Subscribe to a tag',
   execute: async (bot, message, args) => {
-    const utag = args[0], userver = args[1]
-
-    let tag = data.find((x) => x.tag == utag && x.server == userver)
-    if (!tag) {
-      tag = { tag: utag, server: userver, sublist: [] }
-      data.push(tag)
-    }
-
-    const sublist = tag.sublist
-    if (!sublist.includes(message.channelId)) sublist.push(message.channelId)
+    const utag = args[0]
+    subIfNotSubbed(message.channelId, utag)
     await sendMessage(bot, message.channelId, {
-      content: `Registered \`${utag}\` for @${message.tag}`,
+      content: `Subscribed \`${message.tag}\` to \`${utag}\``,
+    })
+  },
+}
+
+const unsubscribe: Command = {
+  name: 'unsubscribe',
+  description: 'Unsubscribe to a tag',
+  execute: async (bot, message, args) => {
+    const utag = args[0]
+    unsubscribeDB(message.channelId, utag)
+    await sendMessage(bot, message.channelId, {
+      content: `Unsubscribed \`${message.tag}\` to \`${utag}\``,
     })
   },
 }
 
 const showList: Command = {
   name: 'list',
-  description: 'Show tag list',
+  description: 'Show subscribed tag list',
   execute: async (bot, message, _args) => {
-    const udata = data.filter((x) => x.sublist.includes(message.channelId)).map(
-      (y) => y.tag,
-    ).join('\n')
-    await sendMessage(bot, message.channelId, { content: `\`${udata}\`` })
+    const userlist = getSubscriptions(message.channelId)
+    const message1 = `\`\`\`\n${userlist.join('\n')}\n\`\`\``
+    await sendMessage(bot, message.channelId, {
+      content: `${message1}`,
+    })
   },
 }
 
@@ -59,11 +67,8 @@ const fetchPost: Command = {
     let tag
     if (args.length > 0) tag = args.join('%20')
     else {
-      const udata = data.filter((x) => x.sublist.includes(message.channelId))
-        .map(
-          (y) => y.tag,
-        )
-      tag = udata[Math.floor(Math.random() * udata.length)]
+      const subs = getSubscriptions(message.channelId)
+      tag = subs[Math.floor(Math.random() * subs.length)]
     }
 
     const post = await fetch(
@@ -76,4 +81,10 @@ const fetchPost: Command = {
   },
 }
 
-export const commands: Command[] = [ping, register, showList, fetchPost]
+export const commands: Command[] = [
+  ping,
+  subscribe,
+  unsubscribe,
+  showList,
+  fetchPost,
+]

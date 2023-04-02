@@ -1,7 +1,9 @@
 import { EventHandlers } from 'https://deno.land/x/discordeno@18.0.1/mod.ts'
 import { commands } from './commands.ts'
+import { initDB } from './db.ts'
 
 const ready: EventHandlers['ready'] = (_bot, payload) => {
+  initDB(false)
   console.log(`Ready! Logged in as ${payload.user.username}`)
 }
 
