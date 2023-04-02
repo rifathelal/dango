@@ -30,6 +30,11 @@ export function initDB(isTest: boolean) {
   `)
 }
 
+export function addUserIfNotExists(userID: bigint) {
+  const db = getDB()
+  db.query(`INSERT INTO users (id) VALUES (?) ON CONFLICT DO NOTHING`, [userID])
+}
+
 export function isAlreadySubbed(userID: bigint, tag: string) {
   const db = getDB()
   return db.query(
@@ -39,14 +44,13 @@ export function isAlreadySubbed(userID: bigint, tag: string) {
 }
 
 export function subscribe(userID: bigint, tag: string) {
-  const db = getDB()
-  const [user] = db.query(`SELECT id FROM users WHERE id = ?`, [userID])
-  if (!user) db.query(`INSERT INTO users (id) VALUES (?)`, [userID])
+  addUserIfNotExists(userID)
 
-  db.query(`INSERT INTO subscriptions (user_id, name) VALUES (?, ?)`, [
-    userID,
-    tag,
-  ])
+  const db = getDB()
+  db.query(
+    `INSERT INTO subscriptions (user_id, name) VALUES (?, ?)`,
+    [userID, tag],
+  )
 }
 
 export function unsubscribe(userID: bigint, tag: string) {
