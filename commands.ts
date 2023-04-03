@@ -1,5 +1,7 @@
 import {
   Bot,
+  CreateMessage,
+  Embed,
   Message,
   sendMessage,
 } from 'https://deno.land/x/discordeno@18.0.1/mod.ts'
@@ -71,13 +73,25 @@ const fetchPost: Command = {
       tag = subs[Math.floor(Math.random() * subs.length)]
     }
 
-    const post = await fetch(
+    const result = await fetch(
       `https://ja.gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=1&tags=${tag}%20sort:random`,
     )
-    const postjson = await post.json()
-    await sendMessage(bot, message.channelId, {
-      content: `${postjson?.post?.[0]?.file_url ?? 'Not found'}`,
-    })
+    const postjson = await result.json()
+    const post = postjson?.post?.[0]?.file_url as string
+    const posttags = postjson?.post?.[0]?.tags as string
+    const embed: Embed | null = post
+      ? {
+        title: `Gelbooru`,
+        url: post,
+        image: { url: post },
+        footer: { text: `${tag}` },
+        // footer: { text: `${tag} | ${posttags}` },
+      }
+      : null
+    const reply: CreateMessage = embed
+      ? { embeds: [embed] }
+      : { content: 'Not found' }
+    await sendMessage(bot, message.channelId, reply)
   },
 }
 
