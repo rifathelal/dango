@@ -65,13 +65,13 @@ export function subIfNotSubbed(userID: bigint, tag: string) {
   if (!isAlreadySubbed(userID, tag)) subscribe(userID, tag)
 }
 
-export function getSubscriptions(userID: bigint) {
+export function getSubscriptions(userID: bigint): string[] {
   const db = getDB()
   const tagList = db.query(
     `SELECT name FROM subscriptions WHERE user_id = ?`,
     [userID],
   )
-  return tagList.map((value) => value[0])
+  return tagList.map((value) => value[0] as string)
 }
 
 export function getUsersByTags(tags: string[]) {
