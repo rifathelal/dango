@@ -1,10 +1,18 @@
 import { EventHandlers } from 'https://deno.land/x/discordeno@18.0.1/mod.ts'
 import { commands } from './commands.ts'
 import { initDB } from './db.ts'
+import { fetchUpdates } from './jobs.ts'
 
-const ready: EventHandlers['ready'] = (_bot, payload) => {
+const ready: EventHandlers['ready'] = (bot, payload) => {
   initDB(false)
   console.log(`Ready! Logged in as ${payload.user.username}`)
+
+  // The following jobs run at certain time intervals
+  // They're launched after the bot is ready
+  const TEN_SECONDS = 10 * 1000
+  setInterval(async () => {
+    await fetchUpdates(bot)
+  }, TEN_SECONDS)
 }
 
 const messageCreate: EventHandlers['messageCreate'] = async (bot, message) => {

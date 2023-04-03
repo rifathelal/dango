@@ -73,3 +73,14 @@ export function getSubscriptions(userID: bigint) {
   )
   return tagList.map((value) => value[0])
 }
+
+export function getUsersByTags(tags: string[]) {
+  const db = getDB()
+  const res = db.query(
+    `SELECT user_id FROM subscriptions WHERE name IN (${
+      '?, '.repeat(tags.length - 1)
+    }?)`,
+    tags,
+  )
+  return res.map((val) => val[0] as bigint)
+}
