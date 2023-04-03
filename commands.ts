@@ -10,6 +10,7 @@ import {
   subIfNotSubbed,
   unsubscribe as unsubscribeDB,
 } from './db.ts'
+import { APIAdapter, GelbooruAdapter } from './api.ts'
 
 export type Command = {
   name: string
@@ -66,25 +67,23 @@ const fetchPost: Command = {
   name: 'fetch',
   description: 'Fetch an image from konachan',
   execute: async (bot, message, args) => {
-    let tag
-    if (args.length > 0) tag = args.join('%20')
+    let tags: string[]
+    if (args.length > 0) tags = args
     else {
       const subs = getSubscriptions(message.channelId)
-      tag = subs[Math.floor(Math.random() * subs.length)]
+      tags = [subs[Math.floor(Math.random() * subs.length)]]
     }
 
-    const result = await fetch(
-      `https://ja.gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=1&tags=${tag}%20sort:random`,
-    )
-    const postjson = await result.json()
-    const post = postjson?.post?.[0]?.file_url as string
-    const posttags = postjson?.post?.[0]?.tags as string
+    const api: APIAdapter = new GelbooruAdapter()
+    const posts = await api.getPosts(tags, 1, true)
+    const post = posts.length > 0 ? posts[0] : null
+
     const embed: Embed | null = post
       ? {
         title: `Gelbooru`,
-        url: post,
-        image: { url: post },
-        footer: { text: `${tag}` },
+        url: post.url,
+        image: { url: post.url },
+        footer: { text: `${tags.join(' ')}` },
         // footer: { text: `${tag} | ${posttags}` },
       }
       : null

@@ -1,24 +1,12 @@
 import { Bot } from 'https://deno.land/x/discordeno@18.0.1/bot.ts'
 import { sendMessage } from 'https://deno.land/x/discordeno@18.0.1/mod.ts'
 import { getUsersByTags } from './db.ts'
-
-type Post = {
-  id: number
-  file_url: string
-  tags: string
-}
+import { APIAdapter, GelbooruAdapter, Post } from './api.ts'
 
 let previousData: Post[] = []
 export async function fetchUpdates(bot: Bot) {
-  const result = await (await fetch(
-    `https://ja.gelbooru.com/index.php?page=dapi&s=post&q=index&json=1`,
-  )).json() as { post: Post[] }
-
-  const newData = result.post.map(({ id, file_url, tags }) => ({
-    id,
-    file_url,
-    tags,
-  }))
+  const api: APIAdapter = new GelbooruAdapter()
+  const newData = await api.getPosts()
 
   if (previousData.length == 0) {
     previousData = newData
@@ -33,9 +21,9 @@ export async function fetchUpdates(bot: Bot) {
 
   const posts = newData.filter((post) => newIDs.has(post.id))
   for (const post of posts) {
-    const users = getUsersByTags(post.tags.split(' '))
+    const users = getUsersByTags(post.tags)
     for (const user of users) {
-      sendMessage(bot, user, { content: post.file_url })
+      sendMessage(bot, user, { content: post.url })
     }
   }
 }
